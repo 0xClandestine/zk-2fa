@@ -7,6 +7,7 @@ import "forge-std/Test.sol";
 contract ContractTest is Test {
 
     TwoFactorAuthMock mock;
+
     Proof proof;
 
     function setUp() public {
@@ -50,18 +51,28 @@ contract ContractTest is Test {
 
     function testGoodProof() public {
 
-        address newOwner = address(0xB0b);
-        uint256 nullifier = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
-
-        mock.setOwner(newOwner, nullifier, proof);
+        // Owner must 
+        mock.setOwner(
+            address(0xB0b), 
+            0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98, 
+            proof
+        );
     }
 
     function testFailGoodProof_Replay() public {
 
-        address newOwner = address(0xB0b);
-        uint256 nullifier = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
+        // Owner must 
+        mock.setOwner(
+            address(0xB0b), 
+            0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98, 
+            proof
+        );
 
-        mock.setOwner(newOwner, nullifier, proof);
-        mock.setOwner(newOwner, nullifier, proof);
+        // Owner must 
+        mock.setOwner(
+            address(0xB0b), 
+            0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98, 
+            proof
+        );
     }
 }
