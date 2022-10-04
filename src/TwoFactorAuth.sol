@@ -5,6 +5,14 @@ import "./Verifier.sol";
 
 abstract contract TwoFactorAuth is Verifier {
     /// -----------------------------------------------------------------------
+    /// Errors
+    /// -----------------------------------------------------------------------
+
+    error InvalidProof();
+    error CallerIsNotOwner();
+    error NullifierAlreadySpent();
+
+    /// -----------------------------------------------------------------------
     /// Events
     /// -----------------------------------------------------------------------
 
@@ -14,9 +22,9 @@ abstract contract TwoFactorAuth is Verifier {
     /// Ownership Storage
     /// -----------------------------------------------------------------------
 
-    uint256 public secretHash;
-
     address public owner;
+
+    uint256 public secretHash;
 
     mapping(uint256 => bool) public nullifierSpent;
 
@@ -30,22 +38,19 @@ abstract contract TwoFactorAuth is Verifier {
         inputs[0] = secretHash;
         inputs[1] = nullifierHash;
 
-        require(
-            msg.sender == owner && 
-            verify(inputs, proof) == 1 && 
-            !nullifierSpent[nullifierHash], 
-            "UNAUTHORIZED"
-        );
+        if (msg.sender != owner) revert CallerIsNotOwner();
+        if (verify(inputs, proof) == 0) revert InvalidProof();
+        if (nullifierSpent[nullifierHash]) revert NullifierAlreadySpent();
 
         nullifierSpent[nullifierHash] = true;
-
+        
         _;
     }
 
     /// -----------------------------------------------------------------------
     /// Constructor
     /// -----------------------------------------------------------------------
-    
+
     constructor(address _owner, uint256 _secretHash) {
         secretHash = _secretHash;
 
