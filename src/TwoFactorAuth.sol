@@ -45,7 +45,7 @@ abstract contract TwoFactorAuth is Verifier {
     /// -----------------------------------------------------------------------
     /// Constructor
     /// -----------------------------------------------------------------------
-
+    
     constructor(address _owner, uint256 _secretHash) {
         secretHash = _secretHash;
 
