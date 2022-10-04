@@ -4,22 +4,28 @@ include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 template Password () {
 
-    // signals
+    /// -----------------------------------------------------------------------
+    /// Signals
+    /// -----------------------------------------------------------------------
 
-    signal input preimage; // private
+    signal input secret; // private
+    signal input nullifier; // private
 
-    signal input hash; // public
+    signal input secretHash; // public
+    signal input nullifierHash; // public
 
-    // constraints
+    /// -----------------------------------------------------------------------
+    /// Constraints
+    /// -----------------------------------------------------------------------
 
-    component algo = Poseidon(1);
+    component secretHasher = Poseidon(1);
+    component nullifierHasher = Poseidon(1);
     
-    algo.inputs[0] <== preimage;
-    
-    log("hash", algo.out);
+    secretHasher.inputs[0] <== secret;
+    nullifierHasher.inputs[0] <== nullifier;
 
-    // assert algo hash of preimage is equal to input hash
-    hash === algo.out;
+    secretHash === secretHasher.out;
+    nullifierHash === nullifierHasher.out;
 }
 
-component main { public [ hash ] } = Password();
+component main { public [ secretHash, nullifierHash ] } = Password();

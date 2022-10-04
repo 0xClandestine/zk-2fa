@@ -14,17 +14,30 @@ abstract contract TwoFactorAuth is Verifier {
     /// Ownership Storage
     /// -----------------------------------------------------------------------
 
-    uint256[] public input;
+    uint256 public secretHash;
 
     address public owner;
 
+    mapping(uint256 => bool) public nullifierSpent;
+
     modifier onlyOwner(
+        uint256 nullifierHash,
         Proof memory proof
     ) virtual {
+
+        uint256[] memory inputs = new uint256[](2);
+
+        inputs[0] = secretHash;
+        inputs[1] = nullifierHash;
+
         require(
-            msg.sender == owner && verify(input, proof) == 1, 
+            msg.sender == owner && 
+            verify(inputs, proof) == 1 && 
+            !nullifierSpent[nullifierHash], 
             "UNAUTHORIZED"
         );
+
+        nullifierSpent[nullifierHash] = true;
 
         _;
     }
@@ -33,9 +46,8 @@ abstract contract TwoFactorAuth is Verifier {
     /// Constructor
     /// -----------------------------------------------------------------------
 
-    constructor(address _owner, uint256 _input) {
-
-        input.push(_input);
+    constructor(address _owner, uint256 _secretHash) {
+        secretHash = _secretHash;
 
         owner = _owner;
         
@@ -48,8 +60,9 @@ abstract contract TwoFactorAuth is Verifier {
 
     function setOwner(
         address newOwner,
+        uint256 nullifierHash,
         Proof memory proof
-    ) public virtual onlyOwner(proof) {
+    ) public virtual onlyOwner(nullifierHash, proof) {
         owner = newOwner;
 
         emit OwnerUpdated(msg.sender, newOwner);
