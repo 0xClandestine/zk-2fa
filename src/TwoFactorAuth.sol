@@ -20,7 +20,7 @@ abstract contract TwoFactorAuth is Verifier {
 
     mapping(uint256 => bool) public nullifierSpent;
 
-    modifier onlyOwner(
+    modifier usingTwoFactorAuth(
         uint256 nullifierHash,
         Proof memory proof
     ) virtual {
@@ -62,7 +62,7 @@ abstract contract TwoFactorAuth is Verifier {
         address newOwner,
         uint256 nullifierHash,
         Proof memory proof
-    ) public virtual onlyOwner(nullifierHash, proof) {
+    ) public virtual usingTwoFactorAuth(nullifierHash, proof) {
         owner = newOwner;
 
         emit OwnerUpdated(msg.sender, newOwner);
