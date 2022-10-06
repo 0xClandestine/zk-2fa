@@ -8,6 +8,7 @@ src
 
 - [Foundry](https://github.com/gakonst/foundry)
 - [Circom](https://github.com/iden3/circom)
+- [Circomspect](https://github.com/trailofbits/circomspect)
 
 ### Dependencies
 
