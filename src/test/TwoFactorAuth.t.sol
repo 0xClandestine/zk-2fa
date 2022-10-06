@@ -46,33 +46,58 @@ contract ContractTest is Test {
             0x165167a1ac89ef9638e0784501226b8ec6b7ce910331562e74b36ff3fb718af2
         );
 
-        proof = Proof(c, b, a);
+        proof = Proof(a, b, c);
     }
 
-    function testGoodProof() public {
+    function testSetOwner() public {
 
-        // Owner must 
-        mock.setOwner(
-            address(0xB0b), 
-            0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98, 
-            proof
-        );
+        address newOwner = address(0xB0b);
+        uint256 nullifierHash = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
+
+        mock.setOwner(newOwner, nullifierHash, proof);
+
+        assertEq(mock.owner(), newOwner);
+        assertEq(mock.nullifierSpent(nullifierHash), true);
     }
 
-    function testFailGoodProof_Replay() public {
+    function testSetOwner_BadProofFails() public {
 
-        // Owner must 
-        mock.setOwner(
-            address(0xB0b), 
-            0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98, 
-            proof
-        );
+        address newOwner = address(0xB0b);
+        uint256 nullifierHash = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
 
-        // Owner must 
-        mock.setOwner(
-            address(0xB0b), 
-            0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98, 
-            proof
-        );
+        uint256[2] memory b0;
+        uint256[2] memory b1;
+
+        G1Point memory a = G1Point(0,0);
+        G2Point memory b = G2Point(b0, b1);
+        G1Point memory c = G1Point(0, 0);
+
+        proof = Proof(a, b, c);
+
+        // Should revert as proof is simply invalid.
+        vm.expectRevert(InvalidProof.selector);
+        mock.setOwner(newOwner, nullifierHash, proof);
+    }
+
+    function testSetOwner_WrongNullifierFails() public {
+
+        address newOwner = address(0xB0b);
+        uint256 nullifierHash = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
+
+        vm.expectRevert(InvalidProof.selector);
+        mock.setOwner(newOwner, 0, proof);
+    }
+
+    function testSetOwner_SpentNullifierFails() public {
+
+        address newOwner = address(0xB0b);
+        uint256 nullifierHash = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
+
+        mock.setOwner(newOwner, nullifierHash, proof);
+        
+        // Should revert as nullifier/proof pair has already been used.
+        vm.prank(newOwner);
+        vm.expectRevert(NullifierAlreadySpent.selector);
+        mock.setOwner(newOwner, nullifierHash, proof);
     }
 }

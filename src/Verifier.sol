@@ -231,21 +231,19 @@ contract Verifier {
         )) return 1;
         return 0;
     }
+    
     /// @return r  bool true if proof is valid
     function verifyProof(
-            uint[2] memory a,
-            uint[2][2] memory b,
-            uint[2] memory c,
-            uint[2] memory input
-        ) public view returns (bool r) {
-        Proof memory proof;
-        proof.A = G1Point(a[0], a[1]);
-        proof.B = G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
-        proof.C = G1Point(c[0], c[1]);
-        uint[] memory inputValues = new uint[](input.length);
-        for(uint i = 0; i < input.length; i++){
-            inputValues[i] = input[i];
-        }
+        Proof memory proof,
+        uint256 secretHash,
+        uint256 nullifierHash
+    ) public view returns (bool r) {
+
+        uint[] memory inputValues = new uint[](2);
+
+        inputValues[0] = secretHash;
+        inputValues[1] = nullifierHash;
+
         if (verify(inputValues, proof) == 0) {
             return true;
         } else {

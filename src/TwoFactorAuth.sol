@@ -3,14 +3,11 @@ pragma solidity ^0.8.0;
 
 import "./Verifier.sol";
 
-abstract contract TwoFactorAuth is Verifier {
-    /// -----------------------------------------------------------------------
-    /// Errors
-    /// -----------------------------------------------------------------------
+error InvalidProof();
+error CallerIsNotOwner();
+error NullifierAlreadySpent();
 
-    error InvalidProof();
-    error CallerIsNotOwner();
-    error NullifierAlreadySpent();
+abstract contract TwoFactorAuth is Verifier {
 
     /// -----------------------------------------------------------------------
     /// Events
@@ -29,8 +26,8 @@ abstract contract TwoFactorAuth is Verifier {
     mapping(uint256 => bool) public nullifierSpent;
 
     modifier usingTwoFactorAuth(
-        uint256 nullifierHash,
-        Proof memory proof
+        Proof memory proof,
+        uint256 nullifierHash
     ) virtual {
 
         uint256[] memory inputs = new uint256[](2);
@@ -39,7 +36,7 @@ abstract contract TwoFactorAuth is Verifier {
         inputs[1] = nullifierHash;
 
         if (msg.sender != owner) revert CallerIsNotOwner();
-        if (verify(inputs, proof) == 0) revert InvalidProof();
+        if (!verifyProof(proof, secretHash, nullifierHash)) revert InvalidProof();
         if (nullifierSpent[nullifierHash]) revert NullifierAlreadySpent();
 
         nullifierSpent[nullifierHash] = true;
@@ -67,7 +64,7 @@ abstract contract TwoFactorAuth is Verifier {
         address newOwner,
         uint256 nullifierHash,
         Proof memory proof
-    ) public virtual usingTwoFactorAuth(nullifierHash, proof) {
+    ) public virtual usingTwoFactorAuth(proof, nullifierHash) {
         owner = newOwner;
 
         emit OwnerUpdated(msg.sender, newOwner);
