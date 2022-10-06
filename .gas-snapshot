@@ -1,4 +1,4 @@
-ContractTest:testSetOwner() (gas: 269214)
-ContractTest:testSetOwner_BadProofFails() (gas: 229717)
-ContractTest:testSetOwner_SpentNullifierFails() (gas: 485995)
-ContractTest:testSetOwner_WrongNullifierFails() (gas: 243017)
+ContractTest:testSetOwner() (gas: 264330)
+ContractTest:testSetOwner_BadProofFails() (gas: 224918)
+ContractTest:testSetOwner_SpentNullifierFails() (gas: 476227)
+ContractTest:testSetOwner_WrongNullifierFails() (gas: 238114)
