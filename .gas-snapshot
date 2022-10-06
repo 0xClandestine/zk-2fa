@@ -1,2 +1,4 @@
-ContractTest:testFailGoodProof_Replay() (gas: 271084)
-ContractTest:testGoodProof() (gas: 266695)
+ContractTest:testSetOwner() (gas: 269214)
+ContractTest:testSetOwner_BadProofFails() (gas: 229717)
+ContractTest:testSetOwner_SpentNullifierFails() (gas: 485995)
+ContractTest:testSetOwner_WrongNullifierFails() (gas: 243017)
