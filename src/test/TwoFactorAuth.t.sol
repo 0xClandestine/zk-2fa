@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./mocks/TwoFactorAuthMock.sol";
 import "forge-std/Test.sol";
 
-contract ContractTest is Test {
+contract TwoFactorAuthTest is Test {
 
     TwoFactorAuthMock mock;
 
@@ -25,14 +25,14 @@ contract ContractTest is Test {
         /// Create Proof
         /// -----------------------------------------------------------------------
 
-        uint256[2] memory b0;
-        uint256[2] memory b1;
-
         G1Point memory a = G1Point(
             0x147f6ef8abdd2561b644b59b1f8992b305c7fbf89158897f587499fe307661d0,
             0x2a7a0cd85b3e18e60b727b0d47ccb03e9953d0f120f49e4c26a8f166ac48a107
         );
         
+        uint256[2] memory b0;
+        uint256[2] memory b1;
+
         b0[0] = 0x0875cb1de7e2c279e05c0a0e5f40c4fb90cf698f4f73b7640ffa6520c7b59048;
         b0[1] = 0x126de70eacce0cea629171f8a09674241f3ecab152196c94a68cf8b4767e3986;
 
@@ -54,9 +54,9 @@ contract ContractTest is Test {
         address newOwner = address(0xB0b);
         uint256 nullifierHash = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
 
-        mock.setOwner(newOwner, nullifierHash, proof);
+        mock.setOwner(proof, nullifierHash, newOwner);
 
-        assertEq(mock.owner(), newOwner);
+        assertEq(mock.ownerCandidate(), newOwner);
         assertEq(mock.nullifierSpent(nullifierHash), true);
     }
 
@@ -76,7 +76,7 @@ contract ContractTest is Test {
 
         // Should revert as proof is simply invalid.
         vm.expectRevert(InvalidProof.selector);
-        mock.setOwner(newOwner, nullifierHash, proof);
+        mock.setOwner(proof, nullifierHash, newOwner);
     }
 
     function testSetOwner_WrongNullifierFails() public {
@@ -85,7 +85,7 @@ contract ContractTest is Test {
         uint256 nullifierHash = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
 
         vm.expectRevert(InvalidProof.selector);
-        mock.setOwner(newOwner, 0, proof);
+        mock.setOwner(proof, 0, newOwner);
     }
 
     function testSetOwner_SpentNullifierFails() public {
@@ -93,11 +93,10 @@ contract ContractTest is Test {
         address newOwner = address(0xB0b);
         uint256 nullifierHash = 0x2d93b56b90980b56eeb1b3ac6a9959ab9480bfe53a1356b6afae137d9f90cb98;
 
-        mock.setOwner(newOwner, nullifierHash, proof);
+        mock.setOwner(proof, nullifierHash, newOwner);
         
         // Should revert as nullifier/proof pair has already been used.
-        vm.prank(newOwner);
         vm.expectRevert(NullifierAlreadySpent.selector);
-        mock.setOwner(newOwner, nullifierHash, proof);
+        mock.setOwner(proof, nullifierHash, newOwner);
     }
 }
